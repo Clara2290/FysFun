@@ -57,6 +57,9 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        var trainingRepository = TrainingRepository(context=this )
+        var trainingHistory by mutableStateOf(trainingRepository.getTrainingHistory())
+        trainingRepository.listenToHistoryChanges { trainingHistory = it }
         setContent {
             FysfunTheme {
                 // A surface container using the 'background' color from the theme
@@ -66,8 +69,6 @@ class MainActivity : ComponentActivity() {
                 ) {
 
                     val navController = rememberNavController()
-                    val trainingRepository = TrainingRepository(context = this)
-                    val trainingHistory = trainingRepository.getTrainingHistory()
 
                     Scaffold(
                         topBar = {
@@ -93,6 +94,7 @@ class MainActivity : ComponentActivity() {
                                     var selectedItemIndex by remember {
                                         mutableIntStateOf(0)
                                     }
+
                                     NavigationBarItem(
                                         selected = selectedItemIndex == 0,
                                         onClick = {
@@ -193,7 +195,13 @@ class MainActivity : ComponentActivity() {
                                 }
                                 composable(route = "settings") {
                                     UserSettings(
-                                        navController = navController
+                                    )
+                                }
+                                composable(route = "questionnairehistory") {
+                                    QuestionnaireHistory(
+                                        list = trainingHistory.trainingRecords,
+                                        onClearDataClicked = trainingRepository::deleteData
+
                                     )
                                 }
                             }
